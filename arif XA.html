@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arif Rifansyah - Analog Terminal Portofolio</title>
+    <style>
+        /* Desain Tema Analog Retro & Mesin CRT Klasik */
+        :root {
+            --bg-color: #d1c7bd;          /* Warna abu-kertas koran kusam */
+            --terminal-bg: #1e1d1a;       /* Latar dalam monitor gelap hangat */
+            --paper-bg: #f2ebd9;          /* Kertas dokumentasi usang */
+            --text-dark: #2c2520;         /* Tinta karbon mesin tik */
+            --amber-analog: #ff8c00;      /* Cahaya lampu pijar jingga */
+            --green-analog: #39ff14;      /* Cahaya fosfor hijau tabung */
+            --border-thick: 4px solid #2c2520;
+            --shadow-3d: 5px 5px 0px #2c2520;
+        }
+
+        /* Scanline CRT Effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.12) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 9999;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Casing Monitor TV Analog / Konsol Jadul */
+        .analog-tv-case {
+            width: 100%;
+            max-width: 850px;
+            background-color: #dfd5c6;
+            border: var(--border-thick);
+            border-radius: 20px;
+            box-shadow: 12px 12px 0px rgba(44, 37, 32, 0.8);
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Panel Kayu Samping Dekoratif khas Radio/TV Lama */
+        .wood-panel-left, .wood-panel-right {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background: repeating-linear-gradient(
+                0deg,
+                #8b5a2b,
+                #8b5a2b 10px,
+                #5c3a21 10px,
+                #5c3a21 20px
+            );
+        }
+        .wood-panel-left { left: 0; border-right: 2px solid #2c2520; }
+        .wood-panel-right { right: 0; border-left: 2px solid #2c2520; }
+
+        /* Layar Kaca Cembung (Inner Screen) */
+        .monitor-screen {
+            background-color: var(--terminal-bg);
+            border: var(--border-thick);
+            border-radius: 12px;
+            padding: 25px;
+            color: #f7ede2;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+            position: relative;
+        }
+
+        /* Header Bergaya Frekuensi Radio / Tape Deck */
+        header {
+            border-bottom: 3px double #f7ede2;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            color: var(--amber-analog);
+            text-shadow: 0 0 8px rgba(255, 140, 0, 0.6);
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+        }
+
+        .signal-indicator {
+            font-size: 0.8rem;
+            color: var(--green-analog);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .dot-blink {
+            width: 8px;
+            height: 8px;
+            background-color: var(--green-analog);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        /* Menu Navigasi Tombol Putar / Push Button Analog */
+        nav {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 25px;
+        }
+
+        .nav-btn {
+            background-color: #3e3a35;
+            color: #d1c7bd;
+            border: 2px solid #5a544c;
+            border-bottom: 5px solid #201e1b;
+            padding: 12px 5px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 4px;
+            transition: all 0.1s ease;
+            text-transform: uppercase;
+        }
+
+        .nav-btn:active {
+            border-bottom-width: 2px;
+            transform: translateY(3px);
+            background-color: #201e1b;
+        }
+
+        .nav-btn.active {
+            background-color: #1a1917;
+            color: var(--amber-analog);
+            border: 2px solid var(--amber-analog);
+            border-bottom: 2px solid var(--amber-analog);
+            box-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
+            transform: translateY(3px);
+        }
+
+        /* Kotak Kertas Laporan (Kertas Dokumentasi Tempel di Layar) */
+        .paper-sheet {
+            background-color: var(--paper-bg);
+            color: var(--text-dark);
+            border: 3px solid #3d352e;
+            padding: 20px;
+            border-radius: 2px;
+            box-shadow: inset 0px 0px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .paper-sheet::before {
+            content: "SYSTEM LOG - AR17";
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            background-color: var(--amber-analog);
+            color: #1e1d1a;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            font-weight: bold;
+            border: 2px solid #2c2520;
+        }
+
+        /* Animasi Transisi Halaman */
+        .page {
+            display: none;
+            animation: staticNoise 0.2s linear;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes staticNoise {
+            0% { opacity: 0.4; filter: contrast(1.5); }
+            50% { opacity: 0.8; filter: grayscale(1); }
+            100% { opacity: 1; filter: none; }
+        }
+
+        /* Halaman Halaman */
+        .page h2 {
+            font-size: 1.3rem;
+            border-bottom: 2px dashed var(--text-dark);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        /* HALAMAN 1: HOME */
+        .home-layout {
+            text-align: center;
+        }
+
+        /* Frame Foto Analog Polaroid */
+        .polaroid-frame {
+            background: #fff;
+            padding: 12px 12px 25px 12px;
+            border: 2px solid #2c2520;
+            display: inline-block;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.15);
+            transform: rotate(-1.5deg);
+            margin-bottom: 20px;
+        }
+
+        .profile-img {
+            width: 170px;
+            height: 180px;
+            object-fit: cover;
+            border: 1px solid #777;
+            display: block;
+            background-color: #d1c7bd;
+        }
+
+        .polaroid-caption {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #3d352e;
+        }
+
+        .slogan-block {
+            background: #ece3cd;
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            margin-top: 20px;
+            font-style: italic;
+            text-align: left;
+            line-height: 1.4;
+            font-size: 0.95rem;
+        }
+
+        /* HALAMAN 2: BIODATA */
+        .retro-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .retro-table td {
+            padding: 10px 12px;
+            border-bottom: 1px dashed #2c2520;
+            font-size: 0.95rem;
+        }
+
+        .retro-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .retro-table td.label-col {
+            font-weight: bold;
+            width: 35%;
+            text-transform: uppercase;
+            color: #723c1c;
+        }
+
+        /* HALAMAN 3: SKILLS & PROGRESS BAR */
+        .list-skills {
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .list-skills li {
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        .analog-meters {
+            border: 2px solid #2c2520;
+            padding: 15px;
+            background-color: #ece3cd;
+            margin-top: 15px;
+        }
+
+        .meter-item {
+            margin-bottom: 15px;
+        }
+
+        .meter-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .meter-label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .dial-track {
+            background-color: #d1c7bd;
+            border: 2px solid #2c2520;
+            height: 16px;
+            position: relative;
+        }
+
+        .dial-fill {
+            background: repeating-linear-gradient(
+                90deg,
+                #d90429,
+                #d90429 4px,
+                #2c2520 4px,
+                #2c2520 8px
+            );
+            height: 100%;
+        }
+
+        /* HALAMAN 4: PORTOFOLIO (DOKUMENTASI FOTO) */
+        .archive-binder {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .archive-item {
+            background-color: #fff;
+            border: 2px solid #2c2520;
+            padding: 12px;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+        }
+
+        .archive-frame {
+            border: 1px solid #2c2520;
+            background: #111;
+            padding: 5px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .archive-item img {
+            max-width: 100%;
+            height: auto;
+            max-height: 320px;
+            object-fit: contain;
+        }
+
+        .archive-desc {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+            border-top: 1px dashed #2c2520;
+            padding-top: 8px;
+            letter-spacing: 1px;
+        }
+
+        /* HALAMAN 5: KONTAK */
+        .terminal-contacts {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .contact-notch {
+            background: #e6dfcf;
+            border: 2px solid #2c2520;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .contact-notch span {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .contact-notch a {
+            color: #9d0208;
+            text-decoration: none;
+            font-weight: bold;
+            border-bottom: 2px solid #9d0208;
+            font-size: 0.9rem;
+        }
+
+        .contact-notch a:hover {
+            background-color: #2c2520;
+            color: #fff;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 0.75rem;
+            border-top: 1px dashed #f7ede2;
+            padding-top: 15px;
+            color: #bfaea2;
+        }
+
+        /* Responsive Mobile Layout */
+        @media (max-width: 600px) {
+            body { padding: 5px; }
+            .analog-tv-case { padding: 15px 10px; border-radius: 10px; }
+            .monitor-screen { padding: 12px; }
+            nav { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+            .nav-btn { font-size: 0.7rem; padding: 10px 2px; }
+            .nav-btn:nth-child(4) { grid-column: span 1; }
+            .nav-btn:nth-child(5) { grid-column: span 2; }
+            .retro-table td { font-size: 0.85rem; padding: 8px 5px; }
+            .contact-notch { flex-direction: column; align-items: flex-start; gap: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Pelindung TV Analog -->
+    <div class="analog-tv-case">
+        <div class="wood-panel-left"></div>
+        <div class="wood-panel-right"></div>
+
+        <!-- Layar Monitor CRT -->
+        <div class="monitor-screen">
+            
+            <header>
+                <h1>ARIF RIFANSYAH</h1>
+                <div class="signal-indicator">
+                    <div class="dot-blink"></div>
+                    <span>Channel: 17-TKJ // Signal: Lock</span>
+                </div>
+            </header>
+
+            <!-- Menu Tombol Deck Musik / Radio Jadul -->
+            <nav>
+                <button class="nav-btn active" onclick="bukaHalaman('home')">HOME</button>
+                <button class="nav-btn" onclick="bukaHalaman('biodata')">BIODATA</button>
+                <button class="nav-btn" onclick="bukaHalaman('skill')">SKILL</button>
+                <button class="nav-btn" onclick="bukaHalaman('portofolio')">PORT</button>
+                <button class="nav-btn" onclick="bukaHalaman('kontak')">KONTAK</button>
+            </nav>
+
+            <!-- Kertas Kerja Output -->
+            <div class="paper-sheet">
+                
+                <!-- HALAMAN 1: HOME -->
+                <section id="home" class="page active">
+                    <div class="home-layout">
+                        <!-- Frame Polaroid Vintage -->
+                        <div class="polaroid-frame">
+                            <img src="arif .jpeg" alt="Arif Rifansyah" class="profile-img" onerror="this.src='https://via.placeholder.com/170x180?text=FOTO+ARIF'">
+                            <div class="polaroid-caption">ARIF R. // 2026</div>
+                        </div>
+                        
+                        <h2>BIOGRAFI UTAMA</h2>
+                        <p style="font-size: 0.95rem; line-height: 1.5; text-align: left; margin-top: 10px;">
+                            Saya adalah siswa jurusan TKJ berusia 17 tahun yang aktif mendalami dunia teknologi informasi, gemar bermain game taktis, dan memiliki visi jangka panjang untuk merintis usaha sendiri.
+                        </p>
+                        
+                        <div class="slogan-block">
+                            “jangan takut gagal, karena orang pintar pun pasti pernah membuta kesalahan”
+                        </div>
+                    </div>
+                </section>
+
+                <!-- HALAMAN 2: BIODATA -->
+                <section id="biodata" class="page">
+                    <h2>IDENTITAS DIRI</h2>
+                    <table class="retro-table">
+                        <tr>
+                            <td class="label-col">Nama Lengkap</td>
+                            <td>Arif Rifansyah</td>
+                        </tr>
+                        <tr>
+                            <td class="label-col">Umur</td>
+                            <td>17 Tahun</td>
+                        </tr>
+                        <tr>
+                            <td class="label-col">Kelas</td>
+                            <td>10A</td>
+                        </tr>
+                        <tr>
+                            <td class="label-col">Jurusan</td>
+                            <td>TKJ (Teknik Komputer & Jaringan)</td>
+                        </tr>
+                        <tr>
+                            <td class="label-col">Hobi</td>
+                            <td>Bermain Game</td>
+                        </tr>
+                        <tr>
+                            <td class="label-col">Cita-Cita</td>
+                            <td>Pengusaha / Berbisnis</td>
+                        </tr>
+                    </table>
+                </section>
+
+                <!-- HALAMAN 3: SKILL & METERAN -->
+                <section id="skill" class="page">
+                    <h2>Keahlian Terdata</h2>
+                    
+                    <ul class="list-skills">
+                        <li>HTML (Tipis-tipis)</li>
+                        <li>Digital Image/Video Editing</li>
+                        <li>Gaming Kompetitif</li>
+                        <li>Teknik Negosiasi & Penjualan</li>
+                    </ul>
+
+                    <div class="analog-meters">
+                        <div class="meter-item">
+                            <div class="meter-label"><span>HTML Dasar</span><span>45%</span></div>
+                            <div class="dial-track"><div class="dial-fill" style="width: 45%;"></div></div>
+                        </div>
+                        <div class="meter-item">
+                            <div class="meter-label"><span>Editing Karya</span><span>70%</span></div>
+                            <div class="dial-track"><div class="dial-fill" style="width: 70%;"></div></div>
+                        </div>
+                        <div class="meter-item">
+                            <div class="meter-label"><span>Gaming Skill</span><span>95%</span></div>
+                            <div class="dial-track"><div class="dial-fill" style="width: 95%;"></div></div>
+                        </div>
+                        <div class="meter-item">
+                            <div class="meter-label"><span>Jiwa Berjualan</span><span>80%</span></div>
+                            <div class="dial-track"><div class="dial-fill" style="width: 80%;"></div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- HALAMAN 4: PORTOFOLIO / ARSIP BERKAS -->
+                <section id="portofolio" class="page">
+                    <h2>Arsip Karya & Gambar</h2>
+                    
+                    <div class="archive-binder">
+                        <!-- Karya 1 -->
+                        <div class="archive-item">
+                            <div class="archive-frame">
+                                <img src="juara epep.jpeg" alt="Sertifikat Juara" onerror="this.src='https://via.placeholder.com/600x400?text=Sertifikat+Epep'">
+                            </div>
+                            <div class="archive-desc">Sertifikat Juara Epep - Role Support</div>
+                        </div>
+
+                        <!-- Karya 2 -->
+                        <div class="archive-item">
+                            <div class="archive-frame">
+                                <img src="blue archive.jpeg" alt="Blue Archive Record" onerror="this.src='https://via.placeholder.com/600x400?text=Blue+Archive'">
+                            </div>
+                            <div class="archive-desc">Blue Archive - High Score Record (27,737,217)</div>
+                        </div>
+
+                        <!-- Karya 3 -->
+                        <div class="archive-item">
+                            <div class="archive-frame">
+                                <img src="senjata epep.jpeg" alt="Senjata Epep" onerror="this.src='https://via.placeholder.com/600x400?text=M1887+Skin'">
+                            </div>
+                            <div class="archive-desc">Peralatan Perang: Senjata M1887</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- HALAMAN 5: JALUR KONTAK -->
+                <section id="kontak" class="page">
+                    <h2>Saluran Komunikasi</h2>
+                    <p style="margin-bottom: 20px; font-size: 0.9rem;">Gunakan jalur komunikasi di bawah ini untuk tersambung ke terminal saya:</p>
+                    
+                    <div class="terminal-contacts">
+                        <div class="contact-notch">
+                            <span>E-Mail</span>
+                            <a href="mailto:mangprangattack21@gmail.com">mangprangattack21@gmail.com</a>
+                        </div>
+                        <div class="contact-notch">
+                            <span>Instagram</span>
+                            <a href="https://instagram.com/" target="_blank">@arif_rifansyah</a>
+                        </div>
+                        <div class="contact-notch">
+                            <span>WhatsApp</span>
+                            <a href="https://wa.me/6285723531536" target="_blank">085723531536</a>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Footer Monitor -->
+            <footer>
+                <p>CORE_SYSTEM: V.1.7-ACTIVE // MADE BY ARIF RIFANSYAH</p>
+            </footer>
+
+        </div>
+    </div>
+
+    <!-- Sistem Navigasi Gonta-ganti Halaman -->
+    <script>
+        function bukaHalaman(pageId) {
+            // Sembunyikan seluruh halaman log
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Setel tombol navigasi ke mode nonaktif
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Tampilkan halaman pilihan
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+
+            // Cari tombol yang sesuai dan jadikan aktif
+            buttons.forEach(button => {
+                if (button.getAttribute('onclick').includes(pageId)) {
+                    button.classList.add('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
